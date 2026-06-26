@@ -51,7 +51,7 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
 # Security group — no inbound (ensures zero connections = underutilized)
 resource "aws_security_group" "rds_sg" {
   name        = "vapor-test-rds-sg"
-  description = "No inbound — ensures RDS stays idle for Vapor testing"
+  description = "No inbound - ensures RDS stays idle for Vapor testing"
   vpc_id      = aws_vpc.rds_vpc.id
 
   egress {
@@ -92,6 +92,6 @@ resource "aws_db_instance" "wasteful_rds" {
 
   tags = merge(local.common_tags, {
     Name = "vapor-test-idle-db"
-    Note = "Idle RDS — Vapor should flag as underutilized + overprovisioned_memory"
+    Note = "Idle RDS - Vapor should flag as underutilized + overprovisioned_memory"
   })
 }

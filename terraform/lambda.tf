@@ -56,7 +56,7 @@ resource "aws_lambda_function" "high_memory_function" {
 
   tags = merge(local.common_tags, {
     Name = "vapor-test-high-memory"
-    Note = "3008 MB memory — Vapor should flag as high_memory"
+    Note = "3008 MB memory - Vapor should flag as high_memory"
   })
 }
 
@@ -72,7 +72,7 @@ resource "aws_lambda_function" "high_timeout_function" {
 
   tags = merge(local.common_tags, {
     Name = "vapor-test-high-timeout"
-    Note = "900s timeout — Vapor should flag as high_timeout"
+    Note = "900s timeout - Vapor should flag as high_timeout"
   })
 }
 
@@ -88,7 +88,7 @@ resource "aws_lambda_function" "high_memory_and_timeout" {
 
   tags = merge(local.common_tags, {
     Name = "vapor-test-high-both"
-    Note = "2048 MB + 900s — Vapor should flag both"
+    Note = "2048 MB + 900s - Vapor should flag both"
   })
 }
 
@@ -104,6 +104,6 @@ resource "aws_lambda_function" "healthy_function" {
 
   tags = merge(local.common_tags, {
     Name = "vapor-test-healthy"
-    Note = "Normal config — Vapor should mark healthy"
+    Note = "Normal config - Vapor should mark healthy"
   })
 }

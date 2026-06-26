@@ -15,7 +15,7 @@ resource "aws_s3_bucket" "no_lifecycle_logs" {
 
   tags = merge(local.common_tags, {
     Name = "vapor-test-logs-no-lifecycle"
-    Note = "No lifecycle policy — Vapor should flag this"
+    Note = "No lifecycle policy - Vapor should flag this"
   })
 }
 
@@ -25,7 +25,7 @@ resource "aws_s3_bucket" "no_lifecycle_artifacts" {
 
   tags = merge(local.common_tags, {
     Name = "vapor-test-artifacts-no-lifecycle"
-    Note = "No lifecycle policy — Vapor should flag this"
+    Note = "No lifecycle policy - Vapor should flag this"
   })
 }
 
@@ -35,7 +35,7 @@ resource "aws_s3_bucket" "no_lifecycle_backups" {
 
   tags = merge(local.common_tags, {
     Name = "vapor-test-backups-no-lifecycle"
-    Note = "No lifecycle policy — Vapor should flag this"
+    Note = "No lifecycle policy - Vapor should flag this"
   })
 }
 
@@ -45,7 +45,7 @@ resource "aws_s3_bucket" "with_lifecycle" {
 
   tags = merge(local.common_tags, {
     Name = "vapor-test-with-lifecycle"
-    Note = "Has lifecycle policy — Vapor should mark healthy"
+    Note = "Has lifecycle policy - Vapor should mark healthy"
   })
 }
 
@@ -55,6 +55,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "with_lifecycle_rules" {
   rule {
     id     = "expire-old-objects"
     status = "Enabled"
+
+    filter {}
 
     expiration {
       days = 90
