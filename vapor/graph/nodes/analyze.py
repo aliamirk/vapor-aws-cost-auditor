@@ -1,0 +1,102 @@
+"""Analyze node — sends normalized findings to GPT-5-mini for severity-tagged analysis.
+
+Handles OpenAI API errors and JSON parsing failures gracefully by producing
+a fallback AnalysisResult so the pipeline always completes.
+"""
+
+from __future__ import annotations
+
+import json
+
+import openai
+
+from vapor.graph.state import AnalysisResult, VaporState
+from vapor.prompts.system import SYSTEM_PROMPT
+from vapor.prompts.user import build_user_message
+
+
+def analyze(state: VaporState) -> dict:
+    """Send normalized findings to GPT-5-mini with json_object response format.
+
+    Parse response into AnalysisResult. On failure, produce fallback result.
+
+    Returns:
+        {"analysis": AnalysisResult}
+    """
+    try:
+        findings = state["findings"]
+        config = state["config"]
+
+        user_message = build_user_message(findings, config)
+
+        client = openai.OpenAI()
+
+        response = client.chat.completions.create(
+            model="gpt-5-mini",
+            max_completion_tokens=4000,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_message},
+            ],
+        )
+
+        content = response.choices[0].message.content
+        result = json.loads(content)
+
+        # Capture token usage statistics
+        usage = response.usage
+        llm_usage = {
+            "model": "gpt-5-mini",
+            "input_tokens": usage.prompt_tokens if usage else 0,
+            "output_tokens": usage.completion_tokens if usage else 0,
+            "total_tokens": usage.total_tokens if usage else 0,
+        }
+
+        # Validate expected keys exist
+        analysis: AnalysisResult = {
+            "summary": result["summary"],
+            "findings": result["findings"],
+        }
+
+        return {"analysis": analysis, "llm_usage": llm_usage}
+
+    except (openai.APIError, json.JSONDecodeError, KeyError) as e:
+        return {
+            "analysis": _build_fallback_analysis(str(e)),
+            "llm_usage": {
+                "model": "gpt-5-mini",
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "total_tokens": 0,
+            },
+        }
+
+
+def _build_fallback_analysis(error_msg: str) -> AnalysisResult:
+    """Construct a minimal AnalysisResult describing the LLM failure.
+
+    Returns an AnalysisResult with zeroed summary counts and a single
+    finding explaining that analysis failed.
+    """
+    return {
+        "summary": {
+            "totalFindings": 0,
+            "criticalCount": 0,
+            "highCount": 0,
+            "mediumCount": 0,
+            "lowCount": 0,
+            "estimatedMonthlySavings": "$0",
+        },
+        "findings": [
+            {
+                "title": "Analysis Failed",
+                "severity": "low",
+                "category": "system",
+                "resource_id": "N/A",
+                "detail": error_msg,
+                "estimated_savings": "$0",
+                "fix": "Retry the audit or check OpenAI API key",
+            }
+        ],
+    }

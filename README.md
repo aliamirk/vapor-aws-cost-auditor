@@ -85,4 +85,4 @@ For Cost Explorer access, ensure the policy also includes:
 ```
 
 > **Note:** Cost Explorer must be enabled in the **AWS Billing Console** before the Cost Explorer collector can retrieve spend data. If it's not enabled, Vapor will handle this gracefully and report it as a collector error rather than crashing.
-# vapor-aws-cost-auditor
+
