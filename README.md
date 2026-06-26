@@ -13,6 +13,14 @@ Vapor is an AWS cost audit CLI tool powered by LangGraph and GPT-5-mini. It scan
 ## Installation
 
 ```bash
+pip install -e .
+```
+
+This installs Vapor as a CLI command. You can now run `vapor` from anywhere.
+
+Alternatively, install dependencies only (without the `vapor` command):
+
+```bash
 pip install -r requirements.txt
 ```
 
@@ -35,19 +43,20 @@ Vapor loads `.env` automatically via `python-dotenv` on startup.
 Minimal invocation (uses defaults: us-east-1, 30-day window):
 
 ```bash
-python vapor.py
+vapor
 ```
 
-Specify a region:
+Specify a region and AWS profile:
 
 ```bash
-python vapor.py --region eu-west-1
+vapor --profile gatepass --region eu-west-1
 ```
 
 Full options:
 
 ```bash
-python vapor.py \
+vapor \
+  --profile gatepass \
   --region us-west-2 \
   --window-days 14 \
   --output report.json \
@@ -59,7 +68,7 @@ python vapor.py \
 ### Example Output
 
 ```bash
-python vapor.py --region us-east-1
+vapor --profile gatepass --region us-east-1
 ```
 
 ![Vapor CLI Output](assets/vapor-screenshot.png)
@@ -68,6 +77,7 @@ python vapor.py --region us-east-1
 
 | Flag | Default | Description |
 |------|---------|-------------|
+| `--profile` | None | AWS CLI profile to use for authentication |
 | `--region` | `us-east-1` | Target AWS region |
 | `--window-days` | `30` | CloudWatch metrics lookback window (days) |
 | `--output` | None | Path to write analysis JSON |

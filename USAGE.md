@@ -3,17 +3,17 @@
 ## Quick Start
 
 ```bash
-# 1. Install dependencies
-pip install -r requirements.txt
+# 1. Install Vapor as a CLI command
+pip install -e .
 
 # 2. Create a .env file with your OpenAI key
 echo "OPENAI_API_KEY=sk-your-key-here" > .env
 
 # 3. Run the audit
-python vapor.py
+vapor --profile your-aws-profile
 ```
 
-That's it. Vapor will scan your default AWS account in `us-east-1`, analyze findings with GPT-5-mini, and print a color-coded report to your terminal.
+That's it. Vapor will scan your AWS account in `us-east-1`, analyze findings with GPT-5-mini, and print a color-coded report to your terminal.
 
 ---
 
@@ -116,13 +116,14 @@ Cost Explorer must be enabled in the AWS Billing Console — if it's not, Vapor 
 ## CLI Reference
 
 ```
-python vapor.py [OPTIONS]
+vapor [OPTIONS]
 ```
 
 ### Options
 
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
+| `--profile` | string | None | AWS CLI profile name to use for authentication |
 | `--region` | string | `us-east-1` | AWS region to scan |
 | `--window-days` | int | `30` | CloudWatch metrics lookback period (days) |
 | `--output` | path | — | Write analysis JSON to this file |
@@ -140,7 +141,7 @@ python vapor.py [OPTIONS]
 ### Basic scan (defaults)
 
 ```bash
-python vapor.py
+vapor --profile gatepass
 ```
 
 Scans `us-east-1` with a 30-day lookback window and prints results to the terminal.
@@ -148,13 +149,13 @@ Scans `us-east-1` with a 30-day lookback window and prints results to the termin
 ### Scan a different region
 
 ```bash
-python vapor.py --region eu-west-1
+vapor --profile gatepass --region eu-west-1
 ```
 
 ### Save the report as JSON
 
 ```bash
-python vapor.py --output report.json
+vapor --profile gatepass --output report.json
 ```
 
 The JSON file contains the full LLM analysis with severity-tagged findings, summary counts, and estimated savings.
@@ -162,7 +163,7 @@ The JSON file contains the full LLM analysis with severity-tagged findings, summ
 ### Save raw collector data for debugging
 
 ```bash
-python vapor.py --save-raw raw_data.json --output report.json
+vapor --profile gatepass --save-raw raw_data.json --output report.json
 ```
 
 `raw_data.json` contains the pre-LLM collector output — useful for debugging or running the analysis offline.
@@ -170,7 +171,7 @@ python vapor.py --save-raw raw_data.json --output report.json
 ### Shorter lookback window
 
 ```bash
-python vapor.py --window-days 7
+vapor --profile gatepass --window-days 7
 ```
 
 Uses only the last 7 days of CloudWatch metrics. Shorter windows give more recent data but less statistical confidence.
@@ -178,7 +179,7 @@ Uses only the last 7 days of CloudWatch metrics. Shorter windows give more recen
 ### Adjust underutilization thresholds
 
 ```bash
-python vapor.py \
+vapor --profile gatepass \
   --ec2-cpu-avg-threshold 5.0 \
   --ec2-cpu-max-threshold 20.0 \
   --rds-cpu-avg-threshold 5.0 \
@@ -190,7 +191,8 @@ Tighter thresholds = fewer false positives (only flags truly idle resources).
 ### Full audit with all options
 
 ```bash
-python vapor.py \
+vapor \
+  --profile gatepass \
   --region us-west-2 \
   --window-days 14 \
   --output audit-report.json \
@@ -266,7 +268,7 @@ When using `--output`, the JSON file has this structure:
 
 ```
 ┌─────────────┐
-│  vapor.py   │  Parse args, load .env, build config
+│    vapor     │  Parse args, load .env, build config
 └──────┬──────┘
        │
 ┌──────▼──────┐
