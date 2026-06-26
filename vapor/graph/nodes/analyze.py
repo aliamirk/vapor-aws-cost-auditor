@@ -1,7 +1,7 @@
 """Analyze node — sends normalized findings to GPT-5-mini for severity-tagged analysis.
 
 Handles OpenAI API errors and JSON parsing failures gracefully by producing
-a fallback AnalysisResult so the pipeline always completes..
+a fallback AnalysisResult so the pipeline always completes...
 """
 
 from __future__ import annotations
