@@ -2,6 +2,8 @@
 
 Vapor is an AWS cost audit CLI tool powered by LangGraph and GPT-5-mini. It scans your AWS account for waste — underutilized EC2/RDS instances, unattached EBS volumes, unassociated Elastic IPs, S3 buckets without lifecycle policies, over-provisioned Lambda functions, and Cost Explorer spend breakdowns — then produces severity-tagged recommendations via LLM analysis.
 
+![Vapor](assets/vapor.png)
+
 ## Prerequisites
 
 - Python 3.11+
