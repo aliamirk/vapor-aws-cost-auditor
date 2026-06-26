@@ -1,7 +1,7 @@
 """Analyze node — sends normalized findings to GPT-5-mini for severity-tagged analysis.
 
 Handles OpenAI API errors and JSON parsing failures gracefully by producing
-a fallback AnalysisResult so the pipeline always completes...
+a fallback AnalysisResult so the pipeline always completes.
 """
 
 from __future__ import annotations
@@ -27,13 +27,21 @@ def analyze(state: VaporState) -> dict:
         findings = state["findings"]
         config = state["config"]
 
-        user_message = build_user_message(findings, config)
+        # Filter out healthy findings to reduce payload size for LLM
+        actionable_findings = [
+            f for f in findings
+            if f.get("verdict") not in ("healthy", "informational")
+        ]
+        # If no actionable findings, still send a subset for context
+        findings_to_send = actionable_findings if actionable_findings else findings[:10]
+
+        user_message = build_user_message(findings_to_send, config)
 
         client = openai.OpenAI()
 
         response = client.chat.completions.create(
             model="gpt-5-mini",
-            max_completion_tokens=4000,
+            max_completion_tokens=16000,
             response_format={"type": "json_object"},
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
@@ -42,6 +50,22 @@ def analyze(state: VaporState) -> dict:
         )
 
         content = response.choices[0].message.content
+
+        # Handle None/empty content (model output truncated or refused)
+        if not content:
+            finish_reason = response.choices[0].finish_reason
+            error_msg = f"LLM returned empty response (finish_reason={finish_reason})"
+            usage = response.usage
+            return {
+                "analysis": _build_fallback_analysis(error_msg),
+                "llm_usage": {
+                    "model": "gpt-5-mini",
+                    "input_tokens": usage.prompt_tokens if usage else 0,
+                    "output_tokens": usage.completion_tokens if usage else 0,
+                    "total_tokens": usage.total_tokens if usage else 0,
+                },
+            }
+
         result = json.loads(content)
 
         # Capture token usage statistics
@@ -61,7 +85,7 @@ def analyze(state: VaporState) -> dict:
 
         return {"analysis": analysis, "llm_usage": llm_usage}
 
-    except (openai.APIError, json.JSONDecodeError, KeyError) as e:
+    except (openai.APIError, json.JSONDecodeError, KeyError, TypeError) as e:
         return {
             "analysis": _build_fallback_analysis(str(e)),
             "llm_usage": {

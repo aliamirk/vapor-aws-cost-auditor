@@ -1,6 +1,6 @@
 # Vapor
 
-AWS cost audit CLI tool powered by LangGraph and GPT-5-mini. Vapor scans your AWS account for waste — underutilized EC2/RDS instances, unattached EBS volumes, unassociated Elastic IPs, S3 buckets without lifecycle policies, over-provisioned Lambda functions, and Cost Explorer spend breakdowns — then produces severity-tagged recommendations via LLM analysis.
+Vapor is an AWS cost audit CLI tool powered by LangGraph and GPT-5-mini. It scans your AWS account for waste — underutilized EC2/RDS instances, unattached EBS volumes, unassociated Elastic IPs, S3 buckets without lifecycle policies, over-provisioned Lambda functions, and Cost Explorer spend breakdowns — then produces severity-tagged recommendations via LLM analysis.
 
 ## Prerequisites
 
@@ -54,6 +54,14 @@ python vapor.py \
   --ec2-cpu-max-threshold 50.0
 ```
 
+### Example Output
+
+```bash
+python vapor.py --region us-east-1
+```
+
+![Vapor CLI Output](assets/vapor-screenshot.png)
+
 ### CLI Options
 
 | Flag | Default | Description |
@@ -85,4 +93,8 @@ For Cost Explorer access, ensure the policy also includes:
 ```
 
 > **Note:** Cost Explorer must be enabled in the **AWS Billing Console** before the Cost Explorer collector can retrieve spend data. If it's not enabled, Vapor will handle this gracefully and report it as a collector error rather than crashing.
+
+## More Details
+
+For a comprehensive usage guide including output format explanation, architecture overview, verdicts reference, and tips, see [USAGE.md](USAGE.md).
 

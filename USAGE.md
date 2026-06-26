@@ -62,15 +62,52 @@ AWS_PROFILE=my-readonly-profile
 
 ### Permissions
 
-Attach the AWS managed **ReadOnlyAccess** policy. For Cost Explorer, also add:
+Vapor needs read-only access to several AWS services. A minimal IAM policy is included in the project at `iam-policy.json`.
 
-```json
-{
-  "Effect": "Allow",
-  "Action": ["ce:GetCostAndUsage"],
-  "Resource": "*"
-}
+**Option A: Use the included policy file**
+
+```bash
+# Create the policy in your AWS account
+aws iam create-policy \
+  --policy-name VaporAuditPolicy \
+  --policy-document file://iam-policy.json \
+  --profile gatepass
+
+# Attach to your IAM user
+aws iam attach-user-policy \
+  --user-name YOUR_USERNAME \
+  --policy-arn arn:aws:iam::YOUR_ACCOUNT_ID:policy/VaporAuditPolicy \
+  --profile gatepass
 ```
+
+**Option B: Attach to an IAM role (for EC2/SSO)**
+
+```bash
+aws iam attach-role-policy \
+  --role-name YOUR_ROLE_NAME \
+  --policy-arn arn:aws:iam::YOUR_ACCOUNT_ID:policy/VaporAuditPolicy \
+  --profile gatepass
+```
+
+**Option C: Use the AWS managed ReadOnlyAccess policy (broader but simpler)**
+
+```bash
+aws iam attach-user-policy \
+  --user-name YOUR_USERNAME \
+  --policy-arn arn:aws:iam::aws:policy/ReadOnlyAccess \
+  --profile gatepass
+```
+
+The minimum permissions Vapor requires:
+
+| Service | Actions |
+|---------|---------|
+| EC2 | DescribeInstances, DescribeVolumes, DescribeAddresses |
+| RDS | DescribeDBInstances |
+| S3 | ListAllMyBuckets, GetLifecycleConfiguration |
+| Lambda | ListFunctions |
+| CloudWatch | GetMetricData |
+| Cost Explorer | ce:GetCostAndUsage |
 
 Cost Explorer must be enabled in the AWS Billing Console — if it's not, Vapor handles this gracefully and reports it as a gap finding.
 
