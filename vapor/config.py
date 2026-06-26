@@ -20,3 +20,4 @@ class AuditConfig:
     rds_memory_free_pct_threshold: float = 75.0
     save_raw: str | None = None
     output: str | None = None
+    profile: str | None = None
